@@ -1,1 +1,20 @@
-{"name":"benson-music-islands","version":"1.0.0","private":true,"scripts":{"build":"node build.cjs","start":"node server.cjs","test":"node verify.cjs"},"dependencies":{"three":"^0.180.0"},"devDependencies":{"esbuild":"^0.25.10"}}
+{
+  "name": "benson-music-islands",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "node build.cjs",
+    "start": "node server.cjs",
+    "test": "node verify.cjs && node --test community.test.mjs"
+  },
+  "dependencies": {
+    "@vercel/blob": "2.8.2",
+    "three": "^0.180.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.10"
+  },
+  "overrides": {
+    "zod": "4.6.6"
+  }
+}
