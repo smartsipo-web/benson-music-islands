@@ -1,16 +1,18 @@
 # Benson’s Music Islands
 
-Independent portfolio for 施維駿 Benson. Five clickable islands, responsive layout, native accessible dialogs, competition results, judge comments, CPA levels, photographs, video collection and family stories.
+Independent portfolio for 施維駿 Benson. Five real-time 3D islands with a cute rock-concert theme, rotatable camera, zoom controls, four lighting presets, an automatic day/night cycle, nine walking family/teacher characters and Benson playing drums. The original copied competition results, judge comments, CPA levels, photographs, videos and family stories remain available in accessible dialogs.
 
 ## Development
 
-Requires Node.js 20+. No package installation required.
+Requires Node.js 20+. Three.js is bundled locally; there is no runtime CDN dependency. Install dependencies once with `npm ci`.
 
 ```
 npm test
 npm run build
 npm start
 ```
+
+Drag to orbit, scroll/pinch to zoom, select an island to read its content. Day/night presets stop the automatic clock; enable 日夜流轉 to resume it. 暫停行走 freezes characters, boats and the clock. Reduced-motion preference starts paused. Browsers without WebGL show the prior illustration and retain content navigation. A hidden tab or offscreen world stops drawing frames. The original reference's interaction was observed at https://puma.taipei/heart-island; all scene geometry and models here are original, with no reference-site assets copied.
 
 ## Content provenance
 

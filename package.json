@@ -1,1 +1,1 @@
-{"name":"benson-music-islands","version":"1.0.0","private":true,"scripts":{"build":"node build.cjs","start":"node server.cjs","test":"node verify.cjs"}}
+{"name":"benson-music-islands","version":"1.0.0","private":true,"scripts":{"build":"node build.cjs","start":"node server.cjs","test":"node verify.cjs"},"dependencies":{"three":"^0.180.0"},"devDependencies":{"esbuild":"^0.25.10"}}
