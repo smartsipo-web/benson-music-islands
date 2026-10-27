@@ -19,3 +19,7 @@ Drag to orbit, scroll/pinch to zoom, select an island to read its content. Day/n
 Copied one way from `smartsipo-web/benson-shih` at commit `c42649b46e9a3cc221e0c0ac6af801a1bb83bfaf` on 2026-10-28. Original repository and deployment are unchanged. `content.json` holds the copied records; all photographs are local independent copies. Original unknown scores/comments remain marked pending. Artwork is an AI-created illustration, not a depiction of an actual location.
 
 Target Vercel project: `prj_kf3ZWUhy1bJYU7xDOLd3bqNrwKC0`, team `bensondrum`. Build: `npm run build`, output: `dist`.
+
+## Trophy walk and scenery
+
+The 3D bay is surrounded by low-poly mountains and pine forests. The trophy boardwalk shows the existing 20 drum and 5 dance competition records. `trophies.js` derives its display from the same `content.json` sections as the original islands, so editing a result updates both presentations. It does not alter those sections. The October 3 Golden Drum event has two explicitly identified stage photos; other events show a pending-photo message until photographs are matched. Scene trophies are stylized representations of the recorded results, not verified replicas of physical trophies. A trophy detail can link back to the original island record, video and judge scores.
