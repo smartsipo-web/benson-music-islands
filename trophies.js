@@ -23,7 +23,7 @@ function sendAwards(){window.dispatchEvent(new CustomEvent('music-awards-ready',
 ready.then(()=>{awardRecords=collectAwards();sendAwards();}).catch(()=>{});
 window.addEventListener('music-world-ready',()=>ready.then(sendAwards).catch(()=>{}));
 window.addEventListener('music-award-select',event=>showAward(event.detail.id));
-document.querySelector('#trophy-gallery').onclick=()=>showAwardGallery();
+window.addEventListener('music-trophy-open',()=>showAwardGallery());
 function awardPanel(title,kicker){
  opener=document.activeElement;document.querySelector('#panel-title').textContent=title;document.querySelector('#panel-kicker').textContent=kicker;
  document.querySelector('#panel-tabs').replaceChildren();document.querySelector('#panel-body').replaceChildren();if(!panel.open)panel.showModal();panel.scrollTop=0;return document.querySelector('#panel-body');
@@ -50,7 +50,7 @@ async function showAward(id){
  if(r.group)body.append(add('p',r.group,'section-lead'));
  if(r.photos.length){const photos=add('div','','award-photos');for(const photo of r.photos){const figure=document.createElement('figure'),img=document.createElement('img');img.src=photo.src;img.alt=photo.alt;img.loading='lazy';figure.append(img,add('figcaption',photo.alt));photos.append(figure)}body.append(photos)}else body.append(add('div','這一場的得獎／比賽照片待補。','award-photo-pending'));
  const actions=add('div','','award-actions');if(r.video){const video=add('a','觀看這場比賽影片 ↗','video-btn');video.href=r.video;video.target='_blank';video.rel='noopener';actions.append(video)}if(r.reviewId){const b=add('button','查看評語與分數','review-trigger');b.onclick=()=>showReview(r.reviewId);actions.append(b)}const original=add('button',`前往${r.category==='街舞'?'街舞島':'爵士鼓島'}完整紀錄`,'video-btn');original.onclick=async()=>{
-  await openIsland(islands.find(i=>i.id===(r.category==='街舞'?'dance':'drum')),document.querySelector('#trophy-gallery'));
+  await openIsland(islands.find(i=>i.id===(r.category==='街舞'?'dance':'drum')),document.querySelector('#island-world'));
   const articles=[...document.querySelectorAll('#panel-body article')],target=articles[r.sourceIndex];if(!target)return;
   const hidden=target.closest('#drum-history');if(hidden){hidden.hidden=false;const toggle=document.querySelector('.drum-history-toggle');toggle?.setAttribute('aria-expanded','true');if(toggle)toggle.textContent='收合歷年戰績';}
   target.classList.add('award-highlight');target.scrollIntoView({block:'center',behavior:'smooth'});

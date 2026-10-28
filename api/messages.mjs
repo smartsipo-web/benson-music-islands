@@ -16,5 +16,5 @@ export default async function handler(req,res){
   }
   const blobs=await records(PREFIX,60),messages=(await Promise.all(blobs.map(b=>readRecord(b.pathname)))).filter(Boolean).sort((a,b)=>b.createdAt-a.createdAt);
   return send(res,200,{messages,serverTime:now});
- }catch(e){console.error('message-api',e.name,e.message);return send(res,503,{error:'生命之樹暫時忙碌，請稍後再試'})}
+ }catch(e){console.error('message-api',e.name,e.message);return send(res,503,{error:'勇氣之樹暫時忙碌，請稍後再試'})}
 }

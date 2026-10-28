@@ -43,7 +43,7 @@ export function enrichWorld(ctx){
  cyl(treeIsland,2.4,2.1,.8,0x80796c,0,-.5,0,20);cyl(treeIsland,2.48,2.4,.15,0xd5bd8a,0,-.02,0,32);cyl(treeIsland,2.28,2.28,.13,0x81a26b,0,.09,0,32);
  const trunkMat=0x986a43;cyl(treeIsland,.24,.42,2.4,trunkMat,0,1.27,0,10);for(const side of [-1,1]){bar(treeIsland,new THREE.Vector3(0,1.25,0),new THREE.Vector3(side*1.1,2.8,.2),.13,trunkMat);bar(treeIsland,new THREE.Vector3(0,1.8,0),new THREE.Vector3(side*.8,3.4,-.2),.1,trunkMat)}
  for(let i=0;i<13;i++){const a=i*2.399,r=.3+(i%4)*.36;ball(treeIsland,.68,[0x8eaf68,0xb0c67a,0x6e9d67][i%3],Math.cos(a)*r,2.8+Math.sin(i)*.55,Math.sin(a)*r,1.15,.85,1)}
- for(let i=0;i<5;i++){const a=i/5*Math.PI*2;lantern(treeIsland,Math.cos(a)*1.8,Math.sin(a)*1.8)}plaque(treeIsland,'TREE OF LIFE','#6b7743',0,.8,1.85,1.7);
+ for(let i=0;i<5;i++){const a=i/5*Math.PI*2;lantern(treeIsland,Math.cos(a)*1.8,Math.sin(a)*1.8)}plaque(treeIsland,'COURAGE TREE','#6b7743',0,.8,1.85,1.7);
  const msgLeaves=group(treeIsland);for(let i=0;i<16;i++){const a=i*2.399,leaf=box(msgLeaves,.18,.24,.035,[0xf2c475,0xe4acbb,0xc8d7a1][i%3],Math.cos(a)*1.2,1.65+(i%4)*.26,Math.sin(a)*1.2);bar(msgLeaves,new THREE.Vector3(leaf.position.x,leaf.position.y+.13,leaf.position.z),new THREE.Vector3(leaf.position.x,2.7,leaf.position.z),.005,0xcab986);}
  return {treeIsland,messageLeaves:msgLeaves};
 }
