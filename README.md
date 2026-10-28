@@ -1,6 +1,6 @@
 # Benson’s Music Islands
 
-Independent portfolio for 施維駿 Benson. Five real-time 3D islands with a cute rock-concert theme, rotatable camera, zoom controls, four lighting presets, an automatic day/night cycle, nine walking family/teacher characters and Benson playing drums. The original copied competition results, judge comments, CPA levels, photographs, videos and family stories remain available in accessible dialogs.
+Independent portfolio for 施維駿 Benson. Five real-time 3D islands with a cute rock-concert theme, rotatable camera, zoom controls, drum/dance lighting themes, nine freely roaming family/teacher characters and Benson playing drums. The original copied competition results, judge comments, CPA levels, photographs, videos and family stories remain available in accessible dialogs.
 
 ## Development
 
@@ -28,7 +28,7 @@ The 3D bay is surrounded by low-poly mountains and pine forests. The trophy boar
 
 The five content islands are spaced roughly 25% farther from the hub. Their stages have rounded props, wooden deck details, instruments, speakers, flowers, café supplies, books, certificates, film reels and a clapperboard. Static geometry is batched by material per island to reduce rendering work.
 
-Benson follows a continuous route along the island perimeter paths and bridges. Each of the five stops has a distinct performance: drums, dance, microphone/bow, trophy salute, and camera pose. `出發巡演` starts the next walk; `跟隨 Benson` tracks the touring character. `全景` cancels following.
+All characters, including Benson and visitors, independently choose random destinations across the five islands, Courage Tree and trophy corridor, following continuous perimeter and bridge routes. Each of the five stops has a distinct performance: drums, dance, microphone/bow, trophy salute, and camera pose. `出發巡演` queues a random destination; `跟隨 Benson` tracks the touring character. `全景` cancels following.
 
 Guests choose a nickname, hair, skin, shirt and home island. Server-created records in the project-specific private Blob store last exactly 1,800,000 ms. The API always filters expired guests, and browser monotonic countdowns remove rendered guest models even if polling is unavailable. Reloading or re-submitting while active returns the same expiry; clients cannot set or extend it. At most 24 guests can normally join at a time. Guest lists refresh every 20 seconds; expiration is also checked locally every second/frame. Old records are removed during visitor API reads.
 
@@ -44,4 +44,7 @@ The BENSON / MUSIC ISLANDS wordmark is upright. The independent tree/trophy link
 
 ## Music performance themes
 The homepage is a single full-height 3D scene. The original official website link is in the header immediately before the collaboration link. Resident introduction, journal and footer sections are removed; all source records remain accessible through island dialogs.
-The drum/dance buttons replace day/night controls. They switch Benson's pose and position, costume color, environment lighting and accent colors. Tour remains optional. Rhythm lighting and synthesized percussion are separate opt-in controls; sound starts disabled. Bridge keys and notes share batched geometry/materials for mobile performance. The drum set opens competition works, the dance floor opens the first recorded dance video, Benson opens his profile, and the stage trophy opens the award collection. Growth tabs derive milestones from existing competition, CPA, dance and performance records.
+The drum/dance buttons replace day/night controls. They switch costume color, environment lighting and accent colors, and queue a walk to the corresponding stage without teleporting. Tour remains optional. Rhythm lighting and synthesized percussion are separate opt-in controls; sound starts disabled. Bridge keys and notes share batched geometry/materials for mobile performance. The drum set opens competition works, the dance floor opens the first recorded dance video, Benson opens his profile, and the stage trophy opens the award collection. Growth tabs derive milestones from existing competition, CPA, dance and performance records.
+
+## Free roaming
+`roaming.mjs` builds the connected seven-area walking network. Each resident/visitor owns independent destination, speed and pause state. Small teacher names are 小臻老師 and 湯湯老師. Pause and reduced-motion settings retain positions; visitor expiry is unchanged. Route tests cover all area pairs, long-run coverage, continuous movement, pause invariance and theme changes during bridge crossings.
