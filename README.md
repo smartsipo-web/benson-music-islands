@@ -48,3 +48,7 @@ The drum/dance buttons replace day/night controls. They switch costume color, en
 
 ## Free roaming
 `roaming.mjs` builds the connected seven-area walking network. Each resident/visitor owns independent destination, speed and pause state. Small teacher names are 小臻老師 and 湯湯老師. Pause and reduced-motion settings retain positions; visitor expiry is unchanged. Route tests cover all area pairs, long-run coverage, continuous movement, pause invariance and theme changes during bridge crossings.
+
+## Neon, photographs and background music
+All five islands have rim tubes and illuminated stage frames. Dance theme enables coordinated soft neon pulses independently of optional rhythm lighting; pause/reduced motion freezes animation. Benson's name label is red. Dialog photographs use natural aspect ratios, including the father-son story photograph with HTML dimensions.
+The supplied Jingbao Latin Fusion MP3 is included as `assets/benson-jingbao-latin-fusion.mp3`. It loops at a low initial volume after an explicit play click; visitors can pause it. Changing browser tabs pauses playback so external YouTube videos do not overlap. The site does not auto-start audio on first load.
