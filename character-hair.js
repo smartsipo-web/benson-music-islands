@@ -8,6 +8,7 @@ export function addCharacterHair(body,{name,kind}){
  const cap=new THREE.Mesh(new THREE.SphereGeometry(.266,18,11,0,Math.PI*2,0,Math.PI*.5),material);cap.position.set(0,.97,-.02);cap.scale.set(1,hat?.72:1,1);cap.castShadow=true;root.add(cap);
  // Back/temple coverage keeps the scalp joined to the face without hiding eyes.
  tuft(0,.994,-.13,.244,.2,.15);for(const side of [-1,1])tuft(side*.22,.985,.01,.055,.115,.095,side*.06);
+ if(hat){cap.visible=false;for(const side of [-1,1])tuft(side*.19,.97,.15,.055,.065,.04,side*.1);return {root,tail,style:'cap',dispose(){material.dispose();highlight.dispose();}};}
  let style=kind==='drummer'||kind==='rock'?'rock':kind==='grandma'||kind==='curly'?'curl':name==='Fun'||kind==='bob'?'bob':kind==='teacher'||kind==='ponytail'?'ponytail':name==='Amber'?'long':kind==='long'?'long':kind==='sister'?'long':'short';
  if(kind==='curly'){for(let i=0;i<11;i++){const a=i*2.399,r=.1+(i%3)*.055;const curl=new THREE.Mesh(new THREE.TorusGeometry(.052,.031,7,14,Math.PI*1.8),i%4===0?highlight:material);curl.position.set(Math.cos(a)*r,1.12+(i%3)*.035,Math.sin(a)*r+.01);curl.rotation.set(.3+Math.sin(a)*.4,a,.2);root.add(curl);}for(const side of [-1,1])tuft(side*.23,1.01,.01,.06,.09,.07);
  }else if(style==='rock'){
@@ -26,8 +27,8 @@ export function addCharacterHair(body,{name,kind}){
    for(let i=0;i<4;i++)tuft(-.17+i*.11,.85,-.275,.018,length*.85,.016,-.04,i===1);
   }
   if(style==='ponytail'){
-   tail=new THREE.Group();tail.position.set(.02,1.16,-.2);root.add(tail);const tie=new THREE.Mesh(new THREE.TorusGeometry(.055,.015,6,12),new THREE.MeshStandardMaterial({color:0xd3999e}));tie.rotation.x=Math.PI/2;tail.add(tie);
-   for(let i=0;i<4;i++){const offset=(i-1.5)*.035;tail.add(lock([[offset,.035,-.015],[offset+.06,-.02,-.13],[offset+.09,-.23,-.16],[offset+.04,-.43,-.075]],.052,.043,i===1));}
+   tail=new THREE.Group();tail.position.set(.05,1.23,-.2);root.add(tail);const tie=new THREE.Mesh(new THREE.TorusGeometry(.055,.015,6,12),new THREE.MeshStandardMaterial({color:0xd3999e}));tie.rotation.x=Math.PI/2;tail.add(tie);
+   for(let i=0;i<4;i++){const offset=(i-1.5)*.035;tail.add(lock([[offset,.035,-.015],[offset+.18,.08,-.16],[offset+.24,-.18,-.23],[offset+.14,-.44,-.13]],.052,.043,i===1));}
   }
  }
  if(hat){cap.visible=false;for(const side of [-1,1])tuft(side*.19,.97,.15,.06,.075,.04,side*.1);}
