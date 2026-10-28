@@ -34,5 +34,5 @@ export function setupVisitorPreview(){
   }
   if(!renderer)return;avatar?.root.removeFromParent();avatar?.dispose();avatar=mannequin(event.detail);scene.add(avatar.root);canvas.dataset.hair=event.detail.hair;canvas.dataset.shirt=event.detail.shirt;render();
  });
- document.querySelector('#community-dialog').addEventListener('close',dispose);
+ window.addEventListener('music-avatar-card-request',event=>{if(!renderer){event.detail.receive(null);return;}render();event.detail.receive(canvas.toDataURL('image/png'));});document.querySelector('#community-dialog').addEventListener('close',dispose);
 }

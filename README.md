@@ -60,3 +60,9 @@ Visitor customization includes nine coordinated outfit colours and seven hairsty
 ## Theme soundtracks and drum concert effects
 Drum mode uses the supplied Jingbao Latin Fusion MP3; dance mode uses `assets/benson-dance-2026.m4a` (2026 肢 A 成發). Theme changes preserve the visitor's play/pause intent while changing tracks, and revision checks prevent stale playback promises from restarting a paused track.
 Drum mode adds four periodic flame jets, seven bouncing note/lightning props and a small shared spark buffer. Dance mode hides these effects. Animation follows the same paused/reduced-motion scene clock, with no extra animation loops or physics engine.
+
+## Guided, compact homepage and next performance
+The homepage now fits portrait/desktop views separately and defaults to collision-aware name labels (Benson stays visible, other names appear nearby/on hover or after a click). A persistent Courage Island call-to-action and anchored scene sign open the existing Courage Tree messages. All previous messages remain in the same store.
+Scene controls are under the collapsible settings panel. It includes volume/current soundtrack, names, pause/follow/zoom and automatic/high/low quality. Portrait/low-core devices disable shadows, cap pixel ratio and target 30 fps; concert sparks are omitted in low quality. Residents use personal walking clocks, slower following, passing offsets, smooth turns and occasional greetings.
+The four-stop guided tour opens real drum records, award collection, upcoming performance and Courage Tree. `upcoming-event.json` is the single source for 2026/10/31 Saturday 13:00, 三條崙小鼓手達人秀, GAIA; its supplied poster is shown on the live island and in its dialog with a Taipei-offset countdown. No exact street address is inferred.
+Visitors can make and download a local 1080×1350 PNG keepsake using the current 3D world and their avatar preview. Making the card does not create/modify a visitor or upload/send data to social services.

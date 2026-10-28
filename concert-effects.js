@@ -26,7 +26,7 @@ export function createConcertEffects(drum){
  for(let i=0;i<3;i++){const bolt=new THREE.Mesh(boltGeometry,gold);bolt.scale.setScalar(.65);root.add(bolt);glyphs.push({object:bolt,angle:i*Math.PI*2/3+1.1,phase:i*1.1+2});}
  const sparkPositions=new Float32Array(24*3),sparkGeometry=new THREE.BufferGeometry();sparkGeometry.setAttribute('position',new THREE.BufferAttribute(sparkPositions,3));
  const sparks=new THREE.Points(sparkGeometry,new THREE.PointsMaterial({color:0xffd270,size:.055,transparent:true,opacity:.8,depthWrite:false,toneMapped:false}));root.add(sparks);
- return {update(time,theme){root.visible=theme==='drum';if(!root.visible)return 0;let active=0;
+ return {update(time,theme,low=false){sparks.visible=!low;root.visible=theme==='drum';if(!root.visible)return 0;let active=0;
   jets.forEach((jet,i)=>{const cycle=(time+jet.phase)%3.4,envelope=cycle<1.35?Math.sin(cycle/1.35*Math.PI)**.65:0;jet.fire.visible=envelope>.02;if(jet.fire.visible)active++;jet.fire.scale.set(.75+envelope*.3,envelope*(.9+Math.sin(time*12+i)*.08),.75+envelope*.3);jet.fire.rotation.z=Math.sin(time*8+i)*.08;
    for(let j=0;j<6;j++){const index=(i*6+j)*3,life=(time*1.3+j/6+jet.phase)%1;sparkPositions[index]=jet.x+Math.sin(j*2.4)*life*.27;sparkPositions[index+1]=.53+life*1.8;sparkPositions[index+2]=jet.z+Math.cos(j*2.4)*life*.23;if(!jet.fire.visible)sparkPositions[index+1]=-5;}
   });sparkGeometry.attributes.position.needsUpdate=true;
