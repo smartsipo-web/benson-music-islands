@@ -2,8 +2,8 @@ import * as THREE from 'three';
 // A continuous, broad terrain belt replaces repeated cone mountains.
 export function createAtmosphere({scene,tree,batchStatic}){
  const terrain=new THREE.Group();scene.add(terrain);
- const begin=Math.PI*.78,sweep=Math.PI*1.44,angular=168,radial=24;
- function surface(a,t){const innerX=25,innerZ=23,outerX=51,outerZ=46;const envelope=(1-Math.exp(-t*16))*Math.exp(-Math.pow((t-.24)/.39,2));const ridge=4.2+3.8*Math.sin(a*2.7+.4)**2+2.8*Math.sin(a*5.3+1.2)**2;const shoulders=1+.13*Math.sin(a*8+t*5)+.07*Math.cos(a*13-t*8);return [Math.cos(a)*(innerX+(outerX-innerX)*t),-.78+envelope*ridge*shoulders,Math.sin(a)*(innerZ+(outerZ-innerZ)*t)];}
+ const begin=0,sweep=Math.PI*2,angular=240,radial=24;
+ function surface(a,t){const innerX=25,innerZ=23,outerX=51,outerZ=46;const envelope=(1-Math.exp(-t*16))*Math.exp(-Math.pow((t-.24)/.39,2));const ridge=4.2+3.8*Math.sin(a*3+.4)**2+2.8*Math.sin(a*5+1.2)**2;const shoulders=1+.13*Math.sin(a*8+t*5)+.07*Math.cos(a*13-t*8);return [Math.cos(a)*(innerX+(outerX-innerX)*t),-.78+envelope*ridge*shoulders,Math.sin(a)*(innerZ+(outerZ-innerZ)*t)];}
  const positions=[],colors=[],indices=[],color=new THREE.Color();
  for(let i=0;i<=angular;i++){const a=begin+sweep*i/angular;for(let j=0;j<=radial;j++){const t=j/radial,p=surface(a,t);positions.push(...p);const elevation=THREE.MathUtils.clamp(p[1]/10,0,1);color.set(0x78956e).lerp(new THREE.Color(0x809fa0),elevation*.72);color.multiplyScalar(.95+.05*Math.sin(a*5+t*3));colors.push(color.r,color.g,color.b);if(i<angular&&j<radial){const n=i*(radial+1)+j;indices.push(n,n+radial+1,n+1,n+1,n+radial+1,n+radial+2)}}}
  const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geometry.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));geometry.setIndex(indices);geometry.computeVertexNormals();const hills=new THREE.Mesh(geometry,new THREE.MeshStandardMaterial({vertexColors:true,roughness:1,flatShading:false,side:THREE.DoubleSide}));hills.receiveShadow=true;terrain.add(hills);
