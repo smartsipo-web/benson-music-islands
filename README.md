@@ -52,3 +52,7 @@ The drum/dance buttons replace day/night controls. They switch costume color, en
 ## Neon, photographs and background music
 All five islands have rim tubes and illuminated stage frames. Dance theme enables coordinated soft neon pulses independently of optional rhythm lighting; pause/reduced motion freezes animation. Benson's name label is red. Dialog photographs use natural aspect ratios, including the father-son story photograph with HTML dimensions.
 The supplied Jingbao Latin Fusion MP3 is included as `assets/benson-jingbao-latin-fusion.mp3`. It loops at a low initial volume after an explicit play click; visitors can pause it. Changing browser tabs pauses playback so external YouTube videos do not overlap. The site does not auto-start audio on first load.
+
+## Island underglow and visitor wardrobe
+Each island now has a continuous lower neon ring plus a radial glow over the water: cyan, pink, amber, mint and violet respectively. Upright neon stage frames are removed. Dance mode increases the underglow with soft pulses.
+Visitor customization includes nine coordinated outfit colours and seven hairstyles (swept short, bob, layered long, ponytail, curls, rock quiff and cap). A rotatable Three.js preview uses the same hair/outfit helpers as island visitors. Hair includes tapered curved locks, distinct ringlets and a layered ponytail; clothing adds a collar, hem, pocket and musical patch. The preview renderer and private materials are released when the dialog closes or the visitor expires. Existing visitor records and 30-minute expiry remain compatible.

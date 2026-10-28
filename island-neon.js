@@ -1,20 +1,18 @@
 import * as THREE from 'three';
 
+// A continuous lower rim and a radial wash on the water, rather than stage frames.
 export function createIslandNeon({groups,definitions,batchStatic}){
- const colors=[0x4de5ff,0xff68d7,0xffb854,0x68ffba,0xb28aff];
+ const colors=[0x24dfff,0xff4fbd,0xffac36,0x42f7a6,0x9b72ff];
  const lights=definitions.map((def,index)=>{
   const root=new THREE.Group();groups[index].add(root);
-  const material=new THREE.MeshStandardMaterial({color:colors[index],emissive:colors[index],emissiveIntensity:.4,roughness:.3,toneMapped:false});
-  const glow=new THREE.MeshBasicMaterial({color:colors[index],transparent:true,opacity:.07,depthWrite:false,toneMapped:false});
-  const ring=new THREE.Mesh(new THREE.TorusGeometry(def.r-.07,.04,6,72),material);ring.rotation.x=-Math.PI/2;ring.position.y=.22;root.add(ring);
-  const halo=new THREE.Mesh(new THREE.TorusGeometry(def.r-.07,.12,6,72),glow);halo.rotation.x=-Math.PI/2;halo.position.y=.22;root.add(halo);
-  function tube(a,b){const from=new THREE.Vector3(...a),to=new THREE.Vector3(...b),direction=to.clone().sub(from);const mesh=new THREE.Mesh(new THREE.CylinderGeometry(.035,.035,direction.length(),6),material);mesh.position.copy(from).add(to).multiplyScalar(.5);mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),direction.normalize());root.add(mesh);}
-  const half=index===4?1.88:index===0?2.15:1.7,top=index===3?3.3:3.18,z=index===4?-1.1:-1.78;
-  tube([-half,.45,z],[-half,top,z]);tube([-half,top,z],[half,top,z]);tube([half,top,z],[half,.45,z]);
-  for(const side of [-1,1])tube([side*(def.r-.55),.35,-.8],[side*(def.r-.55),.35,.8]);
+  const core=new THREE.MeshBasicMaterial({color:colors[index],toneMapped:false,transparent:true,opacity:.65});
+  const aura=new THREE.MeshBasicMaterial({color:colors[index],transparent:true,opacity:.12,depthWrite:false,toneMapped:false});
+  for(const [radius,tube,material,y] of [[def.r+.035,.065,core,-.67],[def.r+.045,.17,aura,-.68]]){const ring=new THREE.Mesh(new THREE.TorusGeometry(radius,tube,8,96),material);ring.rotation.x=-Math.PI/2;ring.position.y=y;root.add(ring);}
+  const washMaterial=new THREE.ShaderMaterial({uniforms:{tint:{value:new THREE.Color(colors[index])},strength:{value:.23}},vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',fragmentShader:'varying vec2 vUv;uniform vec3 tint;uniform float strength;void main(){float radius=length((vUv-.5)*2.);float halo=exp(-pow((radius-.72)/.18,2.));float fade=1.-smoothstep(.85,1.,radius);gl_FragColor=vec4(tint,halo*fade*strength);}',transparent:true,depthWrite:false,toneMapped:false});
+  const wash=new THREE.Mesh(new THREE.PlaneGeometry((def.r+1.1)*2,(def.r+1.1)*2),washMaterial);wash.rotation.x=-Math.PI/2;wash.position.y=-.85;root.add(wash);
   batchStatic(root);
-  const light=new THREE.PointLight(colors[index],.2,def.r*2,2);light.position.set(0,.9,.6);groups[index].add(light);
-  return {material,glow,light};
+  const light=new THREE.PointLight(colors[index],.45,def.r*2.4,2);light.position.set(0,-.5,0);groups[index].add(light);
+  return {core,aura,washMaterial,light};
  });
- return {update(time,theme){const dance=theme==='dance';lights.forEach(({material,glow,light},i)=>{const wave=.65+.35*Math.sin(time*3.4-i*.9)**2;material.emissiveIntensity=dance?2.6+wave*1.8:.32;glow.opacity=dance?.12+wave*.11:.045;light.intensity=dance?2+wave*2:.2;});}};
+ return {update(time,theme){const dance=theme==='dance';lights.forEach(({core,aura,washMaterial,light},i)=>{const wave=.65+.35*Math.sin(time*3.4-i*.9)**2;core.opacity=dance?.75+wave*.25:.58;aura.opacity=dance?.2+wave*.16:.09;washMaterial.uniforms.strength.value=dance?.5+wave*.28:.23;light.intensity=dance?2+wave*2:.45;});}};
 }
