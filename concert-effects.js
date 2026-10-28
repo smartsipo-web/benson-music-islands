@@ -5,7 +5,7 @@ export function createConcertEffects(drum){
  const orange=new THREE.MeshBasicMaterial({color:0xff681c,transparent:true,opacity:.8,toneMapped:false,depthWrite:false});
  const gold=new THREE.MeshBasicMaterial({color:0xffdf65,toneMapped:false});
  const nozzleMaterial=new THREE.MeshStandardMaterial({color:0x363644,metalness:.6,roughness:.4});
- const fireGeometry=new THREE.LatheGeometry([[0,0],[.12,.08],[.18,.36],[.13,.7],[.075,1.12],[0,1.65]].map(p=>new THREE.Vector2(...p)),12);
+ const fireGeometry=new THREE.LatheGeometry([[0,0],[.15,.12],[.25,.6],[.18,1.2],[.1,1.85],[0,2.5]].map(p=>new THREE.Vector2(...p)),12);
  const jets=[[-1.95,.85],[1.95,.85],[-1.9,-.9],[1.9,-.9]].map(([x,z],i)=>{
   const nozzle=new THREE.Mesh(new THREE.CylinderGeometry(.14,.19,.16,10),nozzleMaterial);nozzle.position.set(x,.44,z);root.add(nozzle);
   const fire=new THREE.Group();fire.position.set(x,.52,z);root.add(fire);
