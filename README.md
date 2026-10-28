@@ -56,3 +56,7 @@ The supplied Jingbao Latin Fusion MP3 is included as `assets/benson-jingbao-lati
 ## Island underglow and visitor wardrobe
 Each island now has a continuous lower neon ring plus a radial glow over the water: cyan, pink, amber, mint and violet respectively. Upright neon stage frames are removed. Dance mode increases the underglow with soft pulses.
 Visitor customization includes nine coordinated outfit colours and seven hairstyles (swept short, bob, layered long, ponytail, curls, rock quiff and cap). A rotatable Three.js preview uses the same hair/outfit helpers as island visitors. Hair includes tapered curved locks, distinct ringlets and a layered ponytail; clothing adds a collar, hem, pocket and musical patch. The preview renderer and private materials are released when the dialog closes or the visitor expires. Existing visitor records and 30-minute expiry remain compatible.
+
+## Theme soundtracks and drum concert effects
+Drum mode uses the supplied Jingbao Latin Fusion MP3; dance mode uses `assets/benson-dance-2026.m4a` (2026 肢 A 成發). Theme changes preserve the visitor's play/pause intent while changing tracks, and revision checks prevent stale playback promises from restarting a paused track.
+Drum mode adds four periodic flame jets, seven bouncing note/lightning props and a small shared spark buffer. Dance mode hides these effects. Animation follows the same paused/reduced-motion scene clock, with no extra animation loops or physics engine.
