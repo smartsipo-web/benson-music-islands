@@ -1,0 +1,7 @@
+import {get} from '@vercel/blob';
+import {readFile} from 'node:fs/promises';
+import {PREFIX,publicEvents} from '../lib/activities.mjs';
+export default async function handler(req,res){
+ res.setHeader('Content-Type','application/json; charset=utf-8');res.setHeader('Cache-Control','no-store');
+ try{const r=await get(PREFIX+'state.json',{access:'private',useCache:false});const events=r&&r.statusCode===200?publicEvents(await new Response(r.stream).json()):[];const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Taipei',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());const event=events.filter(e=>e.phase==='upcoming'&&e.date>=today).sort((a,b)=>(a.date+(a.time||'00:00')).localeCompare(b.date+(b.time||'00:00')))[0];if(event){const poster=event.media.find(m=>m.kind==='poster');return res.end(JSON.stringify({title:event.title,subtitle:event.type==='competition'?'比賽預告':'表演預告',performer:'施維駿 Benson',song:event.song,startsAt:event.date+'T'+(event.time||'00:00')+':00+08:00',dateLabel:event.date.replaceAll('-','/')+(event.time?' '+event.time:''),location:event.location,poster:poster?'/api/activities?action=media&id='+poster.id:'assets/2026-1031-santiao-show.jpg'}))}if(events.length){res.statusCode=404;return res.end(JSON.stringify({error:'目前沒有預告活動'}))}const fallback=JSON.parse(await readFile(new URL('../upcoming-event.json',import.meta.url),'utf8'));res.end(JSON.stringify(fallback))}catch(e){console.error('upcoming',e.name);res.statusCode=503;res.end(JSON.stringify({error:'活動服務暫時無法使用'}))}
+}

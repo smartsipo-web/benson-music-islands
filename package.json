@@ -5,7 +5,7 @@
   "scripts": {
     "build": "node build.cjs",
     "start": "node server.cjs",
-    "test": "node verify.cjs && node --test community.test.mjs"
+    "test": "node verify.cjs && node --test community.test.mjs activities.test.mjs"
   },
   "dependencies": {
     "@vercel/blob": "2.8.2",

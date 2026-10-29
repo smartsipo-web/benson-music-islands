@@ -11,12 +11,14 @@ function collectAwards(){
  for(const [section,category] of [['results','爵士鼓'],['dance','街舞']]){
   const doc=document.createElement('div');doc.innerHTML=data.sections[section];
   doc.querySelectorAll('article').forEach((article,index)=>{
+   if(article.dataset.activityId)return;
    const reviewId=article.querySelector('[data-review-id]')?.dataset.reviewId;
    const reviewRecord=data.reviews.find(record=>record.id===reviewId);
    const date=article.querySelector('.date')?.textContent.trim()||'';
    records.push({id:reviewId||`${section}-${index}`,section,category,date,title:article.querySelector('h3').textContent.trim(),result:reviewRecord?.result||article.querySelector('.medal')?.textContent.trim()||'成績紀錄',group:reviewRecord?.group||article.querySelector('p')?.textContent.trim()||'',video:article.querySelector('a[href*="youtu"]')?.href,reviewId,photos:confirmedAwardPhotos[reviewId]||[],sourceIndex:index});
   });
  }
+ for(const e of data.activityEvents||[]){if(e.phase!=='completed'||e.type!=='competition')continue;for(const [i,g] of (e.groups.length?e.groups:[{}]).entries()){records.push({id:e.id+'-'+i,section:e.category==='dance'?'dance':'results',category:e.category==='dance'?'街舞':'爵士鼓',date:e.date.replaceAll('-','.'),title:e.title,result:g.result||'活動紀錄',group:g.name||'',video:g.youtube||e.youtube,photos:e.media.filter(m=>m.kind==='photo').map(m=>({src:window.BensonActivities.mediaUrl(m.id),alt:m.label})),activity:e,groupIndex:i,sourceIndex:-1})}}
  return records.sort((a,b)=>b.date.localeCompare(a.date));
 }
 function sendAwards(){window.dispatchEvent(new CustomEvent('music-awards-ready',{detail:awardRecords.map(({id,title,result,date,category})=>({id,title,result,date,category}))}))}
@@ -49,6 +51,7 @@ async function showAward(id){
  body.append(back,add('div',`${r.category} · ${r.date}`,'date'),add('h3',r.title,'award-detail-title'),add('div',r.result,'award-result'));
  if(r.group)body.append(add('p',r.group,'section-lead'));
  if(r.photos.length){const photos=add('div','','award-photos');for(const photo of r.photos){const figure=document.createElement('figure'),img=document.createElement('img');img.src=photo.src;img.alt=photo.alt;img.loading='lazy';figure.append(img,add('figcaption',photo.alt));photos.append(figure)}body.append(photos)}else body.append(add('div','這一場的得獎／比賽照片待補。','award-photo-pending'));
+ if(r.activity){const detail=document.createElement('div');detail.innerHTML=window.BensonActivities.cards({...r.activity,groups:[r.activity.groups[r.groupIndex]||{}],media:r.activity.media.filter(m=>m.kind==='review')});body.append(detail);return;}
  const actions=add('div','','award-actions');if(r.video){const video=add('a','觀看這場比賽影片 ↗','video-btn');video.href=r.video;video.target='_blank';video.rel='noopener';actions.append(video)}if(r.reviewId){const b=add('button','查看評語與分數','review-trigger');b.onclick=()=>showReview(r.reviewId);actions.append(b)}const original=add('button',`前往${r.category==='街舞'?'街舞島':'爵士鼓島'}完整紀錄`,'video-btn');original.onclick=async()=>{
   await openIsland(islands.find(i=>i.id===(r.category==='街舞'?'dance':'drum')),document.querySelector('#island-world'));
   const articles=[...document.querySelectorAll('#panel-body article')],target=articles[r.sourceIndex];if(!target)return;
