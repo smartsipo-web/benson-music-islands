@@ -44,7 +44,7 @@ export default async function handler(req,res){
  }
  if(!['save','publish','unpublish'].includes(action))return send(res,400,{error:'不支援的操作'});
  const state=await read(STATE),data=state?.data||{events:{}};const id=input.id||randomUUID();if(!/^[a-f0-9-]{36}$/.test(id))throw Error('活動編號不正確');const old=data.events[id];if(old&&input.revision!==old.revision)return send(res,409,{error:'這場活動已在其他視窗更新，請重新開啟後再編輯'});
- const event=action==='unpublish'?old?.draft:validateEvent(input.event);if(!event)throw Error('找不到活動');
+ const event=action==='unpublish'?old?.draft:validateEvent({...input.event,youtube2:input.event?.youtube2??old?.draft.youtube2});if(!event)throw Error('找不到活動');
  const now=new Date().toISOString();data.events[id]={id,draft:event,published:action==='publish'?{...event,id,publishedAt:now}:action==='unpublish'?null:old?.published||null,revision:(old?.revision||0)+1,updatedAt:now};data.updatedAt=now;
  await write(STATE,data,state?.etag);return send(res,200,{event:data.events[id],ok:true});
  }catch(e){console.error('activities',action,e.constructor.name,String(e.message||'').slice(0,250));if(e instanceof BlobPreconditionFailedError||/precondition|already exists|condition/i.test(e.message||''))return send(res,409,{error:'資料版本剛剛有更新，你填寫的內容仍保留在畫面，請稍後再按一次儲存或發布'});return send(res,e.status||400,{error:/blob|token|fetch|network/i.test(e.message||'')?'儲存服務暫時無法使用，請稍後再試':e.message||'操作失敗，請稍後再試'})}

@@ -2,6 +2,8 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {registerHooks} from 'node:module';
 import {scryptSync} from 'node:crypto';
+import {readFileSync} from 'node:fs';
+import {runInNewContext} from 'node:vm';
 import {validateEvent,youtube,publicEvents} from './lib/activities.mjs';
 globalThis.activityTestBlobs=new Map();let sequence=0;
 class BlobNotFoundError extends Error{}
@@ -33,9 +35,18 @@ test('authenticated draft → publish → draft edit → result update → unpub
  result=await request('publish',{cookie,body:{id:record.id,revision:record.revision,event:record.draft}});assert.equal(result.status,200);record=result.data.event;assert.equal((await request('public',{method:'GET'})).data.events.length,1);assert.equal((await request('media&id='+upload.data.id,{method:'GET'})).status,200);
  assert.equal((await request('save',{cookie,body:{id:record.id,revision:1,event}})).status,409);
  result=await request('save',{cookie,body:{id:record.id,revision:record.revision,event:{...record.draft,title:'新草稿內容'}}});record=result.data.event;assert.equal((await request('public',{method:'GET'})).data.events[0].title,event.title);
- result=await request('publish',{cookie,body:{id:record.id,revision:record.revision,event:{...record.draft,phase:'completed',groups:[{name:'A',result:'第一名',youtube:event.youtube,comment:'節奏穩定'},{name:'B',result:'第二名'}]}}});assert.equal(result.status,200);record=result.data.event;assert.equal((await request('public',{method:'GET'})).data.events[0].groups.length,2);
+ result=await request('publish',{cookie,body:{id:record.id,revision:record.revision,event:{...record.draft,phase:'completed',youtube2:'https://youtu.be/MBbnj5EBGIM?si=test',groups:[{name:'A',result:'第一名',youtube:event.youtube,comment:'節奏穩定'},{name:'B',result:'第二名'}]}}});assert.equal(result.status,200);record=result.data.event;const published=(await request('public',{method:'GET'})).data.events[0];assert.equal(published.groups.length,2);assert.equal(published.youtube2,'https://www.youtube.com/watch?v=MBbnj5EBGIM');
+ const {youtube2:ignored,...legacyEvent}=record.draft;result=await request('save',{cookie,body:{id:record.id,revision:record.revision,event:legacyEvent}});assert.equal(result.status,200);record=result.data.event;assert.equal(record.draft.youtube2,published.youtube2,'old open forms do not erase the second video');
  result=await request('unpublish',{cookie,body:{id:record.id,revision:record.revision}});assert.equal(result.status,200);assert.equal((await request('public',{method:'GET'})).data.events.length,0);assert.equal((await request('media&id='+upload.data.id,{method:'GET'})).status,404);
  assert.equal((await request('password',{cookie,body:{currentPassword:pass,password:'another-test-only-password'}})).status,200);assert.equal((await request('session',{method:'GET',cookie})).data.authenticated,false);
  const newLogin=await request('login',{body:{password:'another-test-only-password'}});assert.equal(newLogin.status,200);const newCookie=newLogin.headers['set-cookie'].split(';')[0];assert.equal((await request('logout',{cookie:newCookie})).status,200);assert.equal((await request('session',{method:'GET',cookie:newCookie})).data.authenticated,false);
 });
 test('login attempts are rate limited',async()=>{for(let i=0;i<8;i++)assert.equal((await request('login',{ip:'limited',body:{password:'wrong'}})).status,401);assert.equal((await request('login',{ip:'limited',body:{password:pass}})).status,429)});
+test('one performance renders two video buttons in one activity on both sites',()=>{
+ const validated=validateEvent({...event,type:'performance',phase:'completed',youtube2:'https://youtu.be/MBbnj5EBGIM'});assert.throws(()=>validateEvent({...event,youtube2:'https://evil.test/watch?v=MBbnj5EBGIM'}));assert.equal(validateEvent(event).youtube2,'');
+ const source=readFileSync(new URL('./activities-public.js',import.meta.url),'utf8');
+ const context={window:{},document:{currentScript:{dataset:{}},createElement:()=>({}),head:{append(){}},querySelector:()=>null},location:{origin:'https://test.local'},fetch:async()=>({ok:true,json:async()=>({events:[]})})};runInNewContext(source,context);const cards=context.window.BensonActivities.cards;
+ const html=cards({...validated,id:'test-performance'});assert.equal((html.match(/<article /g)||[]).length,1);assert.equal((html.match(/class="race-video"/g)||[]).length,2);assert.ok(html.includes('▶ 第 1 首'));assert.ok(html.includes('▶ 第 2 首'));assert.ok(html.includes(validated.youtube));assert.ok(html.includes(validated.youtube2));
+ const legacy=cards({...validated,youtube2:undefined,id:'legacy'});assert.equal((legacy.match(/class="race-video"/g)||[]).length,1);assert.ok(legacy.includes('▶ 觀看影片'));
+ const secondOnly=cards({...validated,youtube:'',id:'second-only'});assert.equal((secondOnly.match(/class="race-video"/g)||[]).length,1);assert.ok(secondOnly.includes('▶ 第 2 首'));
+});
