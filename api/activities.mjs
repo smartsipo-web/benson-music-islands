@@ -1,9 +1,16 @@
-import {get,put,del} from '@vercel/blob';
+import {get,head,put,del,BlobNotFoundError,BlobPreconditionFailedError} from '@vercel/blob';
 import {randomBytes,randomUUID,scryptSync} from 'node:crypto';
 import {PREFIX,sha,checkPassword,validateEvent,publicEvents,imageType} from '../lib/activities.mjs';
 const STATE=PREFIX+'state.json',CONFIG=PREFIX+'auth.json';
-async function read(path){const r=await get(path,{access:'private',useCache:false});if(!r||r.statusCode!==200)return null;return {data:await new Response(r.stream).json(),etag:r.blob.etag}}
-async function write(path,data,etag){return put(path,JSON.stringify(data),{access:'private',contentType:'application/json',addRandomSuffix:false,cacheControlMaxAge:0,...(etag?{ifMatch:etag}:{allowOverwrite:false})})}
+async function read(path){
+ // Conditional writes require the storage version, not a compressed HTTP response ETag.
+ // Read metadata first: a change between head/get safely fails the subsequent write.
+ let metadata;try{metadata=await head(path)}catch(e){if(e instanceof BlobNotFoundError)return null;throw e}
+ const r=await get(path,{access:'private',useCache:false,headers:{'accept-encoding':'identity'}});if(!r||r.statusCode!==200)return null;
+ if(path===STATE&&r.blob.etag!==metadata.etag)console.warn('activities_storage_etag',{responseWeak:r.blob.etag.startsWith('W/'),responseMatchesStorage:false});
+ return {data:await new Response(r.stream).json(),etag:metadata.etag};
+}
+async function write(path,data,etag){return put(path,JSON.stringify(data),{access:'private',contentType:'application/json',addRandomSuffix:false,cacheControlMaxAge:0,...(etag?{allowOverwrite:true,ifMatch:etag}:{allowOverwrite:false})})}
 async function authConfig(){return (await read(CONFIG))?.data||{hash:process.env.BENSON_ADMIN_PASSWORD_HASH}}
 function cookie(req){return (req.headers.cookie||'').split(';').map(x=>x.trim()).find(x=>x.startsWith('__Host-benson_admin='))?.slice(20)||''}
 async function session(req){const token=cookie(req);if(!/^[a-f0-9]{64}$/.test(token))return null;const [s,c]=await Promise.all([read(PREFIX+'sessions/'+sha(token)+'.json'),authConfig()]);if(!s||s.data.expires<Date.now()||s.data.version!==sha(c.hash||''))return null;return s.data}
@@ -40,5 +47,5 @@ export default async function handler(req,res){
  const event=action==='unpublish'?old?.draft:validateEvent(input.event);if(!event)throw Error('找不到活動');
  const now=new Date().toISOString();data.events[id]={id,draft:event,published:action==='publish'?{...event,id,publishedAt:now}:action==='unpublish'?null:old?.published||null,revision:(old?.revision||0)+1,updatedAt:now};data.updatedAt=now;
  await write(STATE,data,state?.etag);return send(res,200,{event:data.events[id],ok:true});
- }catch(e){console.error('activities',action,e.name);if(/precondition|already exists|condition/i.test(e.message||''))return send(res,409,{error:'資料剛剛有更新，請重新載入後再試'});return send(res,e.status||400,{error:/blob|token|fetch|network/i.test(e.message||'')?'儲存服務暫時無法使用，請稍後再試':e.message||'操作失敗，請稍後再試'})}
+ }catch(e){console.error('activities',action,e.constructor.name,String(e.message||'').slice(0,250));if(e instanceof BlobPreconditionFailedError||/precondition|already exists|condition/i.test(e.message||''))return send(res,409,{error:'資料版本剛剛有更新，你填寫的內容仍保留在畫面，請稍後再按一次儲存或發布'});return send(res,e.status||400,{error:/blob|token|fetch|network/i.test(e.message||'')?'儲存服務暫時無法使用，請稍後再試':e.message||'操作失敗，請稍後再試'})}
 }

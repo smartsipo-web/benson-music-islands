@@ -4,12 +4,16 @@ import {registerHooks} from 'node:module';
 import {scryptSync} from 'node:crypto';
 import {validateEvent,youtube,publicEvents} from './lib/activities.mjs';
 globalThis.activityTestBlobs=new Map();let sequence=0;
+class BlobNotFoundError extends Error{}
+class BlobPreconditionFailedError extends Error{}
 globalThis.activityTestStorage={
- async get(path){const value=activityTestBlobs.get(path);if(!value)return null;return {statusCode:200,stream:new Response(value.bytes).body,blob:{etag:value.etag,contentType:value.contentType}}},
- async put(path,body,options){const old=activityTestBlobs.get(path);if(options.ifMatch?old?.etag!==options.ifMatch:old&&!options.allowOverwrite)throw Error('precondition failed');const value={bytes:Buffer.from(body),etag:String(++sequence),contentType:options.contentType};activityTestBlobs.set(path,value);return {etag:value.etag}},
+ BlobNotFoundError,BlobPreconditionFailedError,
+ async head(path){const value=activityTestBlobs.get(path);if(!value)throw new BlobNotFoundError('not found');return {etag:value.etag}},
+ async get(path){const value=activityTestBlobs.get(path);if(!value)return null;return {statusCode:200,stream:new Response(value.bytes).body,blob:{etag:'W/'+value.etag,contentType:value.contentType}}},
+ async put(path,body,options){const old=activityTestBlobs.get(path);if(options.ifMatch?old?.etag!==options.ifMatch:old&&!options.allowOverwrite)throw new BlobPreconditionFailedError('precondition failed');if(old&&options.ifMatch)assert.equal(options.allowOverwrite,true,'conditional updates explicitly allow overwrite');const value={bytes:Buffer.from(body),etag:'"'+String(++sequence)+'"',contentType:options.contentType};activityTestBlobs.set(path,value);return {etag:value.etag}},
  async del(path){activityTestBlobs.delete(path)}
 };
-registerHooks({resolve(specifier,context,next){if(specifier==='@vercel/blob')return {url:'data:text/javascript,export const {get,put,del}=globalThis.activityTestStorage;',shortCircuit:true};return next(specifier,context)}});
+registerHooks({resolve(specifier,context,next){if(specifier==='@vercel/blob')return {url:'data:text/javascript,export const {get,head,put,del,BlobNotFoundError,BlobPreconditionFailedError}=globalThis.activityTestStorage;',shortCircuit:true};return next(specifier,context)}});
 const {default:handler}=await import('./api/activities.mjs');
 const pass='test-only-long-password';process.env.BENSON_ADMIN_PASSWORD_HASH='test-salt:'+scryptSync(pass,'test-salt',64).toString('hex');
 async function request(action,{method='POST',body={},cookie,origin='https://test.local',ip='test'}={}){let headers={},raw;const req={url:'/api/activities?action='+action,method,headers:{host:'test.local',origin,'content-type':'application/json','x-forwarded-for':ip,...(cookie?{cookie}:{})},body};const res={statusCode:200,setHeader(k,v){headers[k.toLowerCase()]=v},end(v){raw=v}};await handler(req,res);let data;try{data=JSON.parse(raw)}catch{data=raw}return {status:res.statusCode,data,headers}}
