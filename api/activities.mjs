@@ -1,6 +1,6 @@
 import {get,head,put,del,BlobNotFoundError,BlobPreconditionFailedError} from '@vercel/blob';
 import {randomBytes,randomUUID,scryptSync} from 'node:crypto';
-import {PREFIX,sha,checkPassword,validateEvent,publicEvents,imageType} from '../lib/activities.mjs';
+import {PREFIX,sha,checkPassword,validateEvent,publicEvents,imageType,validateGallery,publicGalleries} from '../lib/activities.mjs';
 const STATE=PREFIX+'state.json',CONFIG=PREFIX+'auth.json';
 async function read(path){
  // Conditional writes require the storage version, not a compressed HTTP response ETag.
@@ -20,10 +20,10 @@ async function loginLimit(req){const ip=String(req.headers['x-vercel-forwarded-f
 export default async function handler(req,res){
  const action=new URL(req.url,'https://local').searchParams.get('action')||'public';
  try{
- if(action==='public'&&req.method==='GET'){res.setHeader('Access-Control-Allow-Origin','*');const s=await read(STATE);return send(res,200,{events:publicEvents(s?.data||{}),updatedAt:s?.data.updatedAt||null})}
+ if(action==='public'&&req.method==='GET'){res.setHeader('Access-Control-Allow-Origin','*');const s=await read(STATE);return send(res,200,{events:publicEvents(s?.data||{}),gallery:publicGalleries(s?.data||{}),updatedAt:s?.data.updatedAt||null})}
  if(action==='media'&&req.method==='GET'){
   const id=new URL(req.url,'https://local').searchParams.get('id');if(!/^[a-f0-9-]{36}$/.test(id||''))return send(res,404,{error:'找不到照片'});
-  const s=await read(STATE);const visible=publicEvents(s?.data||{}).some(e=>e.media.some(m=>m.id===id));if(!visible&&!await session(req))return send(res,404,{error:'找不到照片'});
+  const s=await read(STATE);const visible=[...publicEvents(s?.data||{}),...publicGalleries(s?.data||{})].some(e=>e.media.some(m=>m.id===id));if(!visible&&!await session(req))return send(res,404,{error:'找不到照片'});
   const r=await get(PREFIX+'media/'+id,{access:'private',useCache:false});if(!r||r.statusCode!==200)return send(res,404,{error:'找不到照片'});res.setHeader('Content-Type',r.blob.contentType);res.setHeader('Cache-Control','private, no-store');res.setHeader('X-Content-Type-Options','nosniff');res.statusCode=200;return res.end(Buffer.from(await new Response(r.stream).arrayBuffer()));
  }
  if(action==='session'&&req.method==='GET')return send(res,200,{authenticated:!!await session(req),configured:!!process.env.BENSON_ADMIN_PASSWORD_HASH});
@@ -39,6 +39,19 @@ export default async function handler(req,res){
   const config=await authConfig();if(!checkPassword(input.currentPassword||'',config.hash))return send(res,400,{error:'目前密碼不正確'});if(typeof input.password!=='string'||input.password.length<12||input.password.length>128)return send(res,400,{error:'新密碼請使用 12–128 個字元'});const salt=randomBytes(16).toString('hex'),hash=salt+':'+scryptSync(input.password,salt,64).toString('hex');const old=await read(CONFIG);await write(CONFIG,{hash},old?.etag);res.setHeader('Set-Cookie','__Host-benson_admin=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0');return send(res,200,{ok:true});
  }
  if(action==='list'){const state=await read(STATE);return send(res,200,{events:Object.values(state?.data.events||{}).sort((a,b)=>b.draft.date.localeCompare(a.draft.date))})}
+ if(action==='gallery-list'){const state=await read(STATE);return send(res,200,{gallery:publicGalleries(state?.data||{})})}
+ if(action==='gallery-publish'||action==='gallery-unpublish'){
+  const state=await read(STATE),data=state?.data||{events:{}};data.galleries||={};const id=input.id;
+  if(!/^[a-f0-9-]{36}$/.test(id||''))throw Error('照片批次編號不正確');
+  const now=new Date().toISOString();
+  if(action==='gallery-publish'){
+   const gallery=validateGallery(input.gallery),old=data.galleries[id];
+   if(old){if(old.publishedAt&&JSON.stringify({title:old.title,media:old.media})===JSON.stringify(gallery))return send(res,200,{ok:true,gallery:old});return send(res,409,{error:'這批照片已經處理過，請重新開啟照片入口'})}
+   await Promise.all(gallery.media.map(m=>head(PREFIX+'media/'+m.id)));
+   data.galleries[id]={...gallery,id,publishedAt:now};
+  }else{if(!data.galleries[id])throw Error('找不到這批照片');data.galleries[id]={...data.galleries[id],publishedAt:null,unpublishedAt:now}}
+  data.updatedAt=now;await write(STATE,data,state?.etag);return send(res,200,{ok:true,gallery:data.galleries[id]});
+ }
  if(action==='upload'){
   if(typeof input.data!=='string'||input.data.length>3500000||!/^[A-Za-z0-9+/]*={0,2}$/.test(input.data))throw Error('照片過大，請縮小後再上傳');const bytes=Buffer.from(input.data,'base64');if(bytes.length>2500000)throw Error('照片需小於 2.5 MB');const type=imageType(bytes),id=randomUUID();await put(PREFIX+'media/'+id,bytes,{access:'private',contentType:type,addRandomSuffix:false,allowOverwrite:false});return send(res,200,{id});
  }

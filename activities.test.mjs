@@ -1,10 +1,10 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {registerHooks} from 'node:module';
-import {scryptSync} from 'node:crypto';
+import {scryptSync,randomUUID} from 'node:crypto';
 import {readFileSync} from 'node:fs';
 import {runInNewContext} from 'node:vm';
-import {validateEvent,youtube,publicEvents} from './lib/activities.mjs';
+import {validateEvent,youtube,publicEvents,validateGallery} from './lib/activities.mjs';
 globalThis.activityTestBlobs=new Map();let sequence=0;
 class BlobNotFoundError extends Error{}
 class BlobPreconditionFailedError extends Error{}
@@ -37,6 +37,17 @@ test('authenticated draft → publish → draft edit → result update → unpub
  result=await request('save',{cookie,body:{id:record.id,revision:record.revision,event:{...record.draft,title:'新草稿內容'}}});record=result.data.event;assert.equal((await request('public',{method:'GET'})).data.events[0].title,event.title);
  result=await request('publish',{cookie,body:{id:record.id,revision:record.revision,event:{...record.draft,phase:'completed',youtube2:'https://youtu.be/MBbnj5EBGIM?si=test',groups:[{name:'A',song:'Supercharged',result:'第一名',youtube:event.youtube,comment:'節奏穩定'},{name:'B',result:'第二名'}]}}});assert.equal(result.status,200);record=result.data.event;const published=(await request('public',{method:'GET'})).data.events[0];assert.equal(published.groups.length,2);assert.equal(published.groups[0].song,'Supercharged');assert.equal(published.groups[1].song,'');assert.equal(published.youtube2,'https://www.youtube.com/watch?v=MBbnj5EBGIM');
  const {youtube2:ignored,...legacyEvent}=record.draft;result=await request('save',{cookie,body:{id:record.id,revision:record.revision,event:legacyEvent}});assert.equal(result.status,200);record=result.data.event;assert.equal(record.draft.youtube2,published.youtube2,'old open forms do not erase the second video');
+ // Standalone photos do not need, create, or alter an activity record.
+ assert.equal((await request('gallery-publish',{body:{}})).status,401);
+ const galleryMedia=[];for(let i=0;i<5;i++){const photo=await request('upload',{cookie,body:{data:Buffer.from([255,216,255,10+i]).toString('base64')}});assert.equal(photo.status,200);galleryMedia.push({id:photo.data.id,label:'舞台照 '+(i+1)})}
+ const batch=randomUUID(),gallery={title:'舞台影像五張',media:galleryMedia};
+ assert.equal((await request('public',{method:'GET'})).data.gallery.length,0);assert.equal((await request('media&id='+galleryMedia[0].id,{method:'GET'})).status,404);
+ assert.equal((await request('gallery-publish',{cookie,body:{id:batch,gallery:{...gallery,media:[...galleryMedia,media[0]]}}})).status,400);
+ assert.equal((await request('gallery-publish',{cookie,body:{id:batch,gallery}})).status,200);
+ let feed=(await request('public',{method:'GET'})).data;assert.equal(feed.gallery.length,1);assert.equal(feed.gallery[0].media.length,5);assert.equal(feed.events.length,1);assert.equal(feed.events[0].youtube2,published.youtube2);assert.equal((await request('media&id='+galleryMedia[0].id,{method:'GET'})).status,200);
+ assert.equal((await request('gallery-publish',{cookie,body:{id:batch,gallery}})).status,200);assert.equal((await request('public',{method:'GET'})).data.gallery.length,1,'repeated request does not duplicate photos');
+ assert.equal((await request('gallery-list',{cookie,body:{}})).data.gallery.length,1);
+ assert.equal((await request('gallery-unpublish',{cookie,body:{id:batch}})).status,200);assert.equal((await request('public',{method:'GET'})).data.gallery.length,0);assert.equal((await request('media&id='+galleryMedia[0].id,{method:'GET'})).status,404);assert.equal((await request('media&id='+galleryMedia[0].id,{method:'GET',cookie})).status,200);
  result=await request('unpublish',{cookie,body:{id:record.id,revision:record.revision}});assert.equal(result.status,200);assert.equal((await request('public',{method:'GET'})).data.events.length,0);assert.equal((await request('media&id='+upload.data.id,{method:'GET'})).status,404);
  assert.equal((await request('password',{cookie,body:{currentPassword:pass,password:'another-test-only-password'}})).status,200);assert.equal((await request('session',{method:'GET',cookie})).data.authenticated,false);
  const newLogin=await request('login',{body:{password:'another-test-only-password'}});assert.equal(newLogin.status,200);const newCookie=newLogin.headers['set-cookie'].split(';')[0];assert.equal((await request('logout',{cookie:newCookie})).status,200);assert.equal((await request('session',{method:'GET',cookie:newCookie})).data.authenticated,false);
@@ -49,4 +60,5 @@ test('one performance renders two video buttons in one activity on both sites',(
  const html=cards({...validated,id:'test-performance'});assert.equal((html.match(/<article /g)||[]).length,1);assert.equal((html.match(/class="race-video"/g)||[]).length,2);assert.ok(html.includes('▶ 第 1 首'));assert.ok(html.includes('▶ 第 2 首'));assert.ok(html.includes(validated.youtube));assert.ok(html.includes(validated.youtube2));
  const legacy=cards({...validated,youtube2:undefined,id:'legacy'});assert.equal((legacy.match(/class="race-video"/g)||[]).length,1);assert.ok(legacy.includes('▶ 觀看影片'));
  const secondOnly=cards({...validated,youtube:'',id:'second-only'});assert.equal((secondOnly.match(/class="race-video"/g)||[]).length,1);assert.ok(secondOnly.includes('▶ 第 2 首'));const grouped=cards({...validated,groups:[{name:'A',song:'Supercharged'},{name:'B',song:'Your Idol'}],id:'group-songs'});assert.ok(grouped.includes('Supercharged'));assert.ok(grouped.includes('Your Idol'));assert.ok(!grouped.includes('台中 · GAIA'));assert.ok(legacy.includes('台中 · GAIA'));
+ const photos=Array.from({length:5},(_,i)=>({id:randomUUID(),label:i===0?'<script>unsafe</script>':'舞台照 '+i}));assert.equal(validateGallery({media:photos}).media.length,5);assert.throws(()=>validateGallery({media:[]}));assert.throws(()=>validateGallery({media:[...photos,{id:randomUUID()}]}));assert.throws(()=>validateGallery({media:[photos[0],photos[0]]}));const gallery=context.window.BensonActivities.galleryMarkup([{title:'舞台照片',media:photos}]);assert.equal((gallery.match(/<figure>/g)||[]).length,5);assert.ok(!gallery.includes('<script>'));assert.ok(gallery.includes('&lt;script&gt;'));
 });
