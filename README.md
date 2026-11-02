@@ -83,3 +83,7 @@ The Courage Tree now has curved roots/trunk/branches, a layered leafy canopy, a 
 
 ### RPG visual/combat update
 Demon Island is now behind the drum island near the outer bay (0, -17.2); the toolbar entry is removed. The island sign remains clickable. Chibi rigs, expressive monster faces, skill movement/impact particles/damage numbers and sequential enemy counter animations use server-reported combat outcomes. Three distinct environments correspond to zones 0/1/2. Original standard MIDI files in assets/demon-cave-{0,1,2}.mid are decoded and synthesized locally; optional music pauses when the dialog closes or the page is hidden. Seven-day rewards are claimed by tapping the active DAY card (days 5/7 show a choice first).
+
+### Mobile battle presentation
+Immersive responsive battle layout, SVG skill controls, enemy intent/energy HUD, soft shadows/bloom, skill-specific hit effects and camera feedback. Camp navigation and character creation are redesigned. Run-start reward baselines drive accurate victory summaries without changing existing saves or combat balance. Mobile DPR is capped and the main island renderer pauses during adventure play.
+
