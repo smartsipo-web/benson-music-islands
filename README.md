@@ -80,3 +80,6 @@ The Courage Tree now has curved roots/trunk/branches, a layered leafy canopy, a 
 - Three zones (Lv.1/3/5), three monsters per run, free one-monster tutorial once. Battle survives closing/reloading. Defeat retains partial XP/refunds half entry energy; retreat does not refund.
 - First release uses turn-based combat; precision rhythm mini-games remain separate in the existing daily rhythm challenge.
 - `demon-game.test.mjs` tests daily boundaries, rewards, crafting/skill gates, combat/XP, rank privacy, API recovery/origin checks and conditional writes using isolated storage.
+
+### RPG visual/combat update
+Demon Island is now behind the drum island near the outer bay (0, -17.2); the toolbar entry is removed. The island sign remains clickable. Chibi rigs, expressive monster faces, skill movement/impact particles/damage numbers and sequential enemy counter animations use server-reported combat outcomes. Three distinct environments correspond to zones 0/1/2. Original standard MIDI files in assets/demon-cave-{0,1,2}.mid are decoded and synthesized locally; optional music pauses when the dialog closes or the page is hidden. Seven-day rewards are claimed by tapping the active DAY card (days 5/7 show a choice first).
