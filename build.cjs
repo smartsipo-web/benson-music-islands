@@ -7,3 +7,5 @@ const {createHash}=require('node:crypto');let html=fs.readFileSync('dist/index.h
 for(const name of ['style.css','app.js','activities-public.js']){const version=createHash('sha256').update(fs.readFileSync(name)).digest('hex').slice(0,12);html=html.replaceAll('"'+name+'"','"'+name+'?v='+version+'"')}
 fs.writeFileSync('dist/index.html',html);
 console.log('Static production build complete.');
+
+require('esbuild').buildSync({entryPoints:['rhythm-challenge.js'],outfile:'dist/rhythm-play.js',bundle:true,minify:true,format:'esm',target:'es2020'});
