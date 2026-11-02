@@ -70,3 +70,13 @@ Visitors can make and download a local 1080×1350 PNG keepsake using the current
 ## Teacher performances and courage-tree sculpture
 Bird/Niao and A-Bao are drum teachers: each walks to a dedicated compact drum kit and performs alternating stick/pedal motions. Xuan-Xuan, Xiao-Zhen and Tang-Tang gather at three distinct dance-floor positions, wait for each other and share a synchronized choreography clock. Sessions last 22 seconds, then teachers resume random cross-island walks; selecting a theme can invite its teachers back. Stage holds and custom approach paths keep arrivals continuous and avoid stacking actors on Benson's spot.
 The Courage Tree now has curved roots/trunk/branches, a layered leafy canopy, a ring seat and flowers, heart-shaped hanging message cards, a warm heart charm, subtle fireflies and a Chinese sign. Existing message data and entry points are unchanged. All animations share pause/reduced-motion behavior.
+
+## Demon Island RPG
+- Entry: homepage Demon Island sign/button, or `?play=demon#explore`.
+- Private Vercel Blob namespace `demon-rpg-v1/`; completely separate from original site content and existing activity/community records.
+- Persistent HttpOnly/Secure anonymous adventure cookie; private 64-character recovery code available under Adventure Save. Recovery transfers access to the same character; never share the code publicly.
+- Server-controlled turns, levels (1–10), experience, energy, equipment, six class skills, crafting, daily first win, seven-day claim cycle and public level ranking. Conditional storage writes reject concurrent/replayed state updates.
+- Taiwan midnight resets energy to 60 and daily first-win eligibility. Claims are once/day, interrupted claim streak restarts, seven-day badge persists. Potions restore 10 energy up to 90.
+- Three zones (Lv.1/3/5), three monsters per run, free one-monster tutorial once. Battle survives closing/reloading. Defeat retains partial XP/refunds half entry energy; retreat does not refund.
+- First release uses turn-based combat; precision rhythm mini-games remain separate in the existing daily rhythm challenge.
+- `demon-game.test.mjs` tests daily boundaries, rewards, crafting/skill gates, combat/XP, rank privacy, API recovery/origin checks and conditional writes using isolated storage.

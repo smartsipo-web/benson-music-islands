@@ -9,3 +9,5 @@ fs.writeFileSync('dist/index.html',html);
 console.log('Static production build complete.');
 
 require('esbuild').buildSync({entryPoints:['rhythm-challenge.js'],outfile:'dist/rhythm-play.js',bundle:true,minify:true,format:'esm',target:'es2020'});
+
+require('esbuild').buildSync({entryPoints:['adventure-ui.js'],outfile:'dist/adventure-play.js',bundle:true,minify:true,format:'esm',target:'es2020'});
