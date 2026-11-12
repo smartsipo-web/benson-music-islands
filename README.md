@@ -87,3 +87,7 @@ Demon Island is now behind the drum island near the outer bay (0, -17.2); the to
 ### Mobile battle presentation
 Immersive responsive battle layout, SVG skill controls, enemy intent/energy HUD, soft shadows/bloom, skill-specific hit effects and camera feedback. Camp navigation and character creation are redesigned. Run-start reward baselines drive accurate victory summaries without changing existing saves or combat balance. Mobile DPR is capped and the main island renderer pauses during adventure play.
 
+
+## Taiwan competition journey
+The drum island opens a responsive SVG relief map with actual county boundaries, eight confirmed competition counties, year filters and an all-records list. Existing competition HTML remains the source for videos, results and review IDs (20 group records / 17 events); trophy corridor and original site remain independent. Geography is simplified from https://github.com/ronnywang/twgeojson (2012 county boundaries, Taoyuan label normalized to current city name); offshore geography is not to scale. Map selection has keyboard and HTML button alternatives and a fetch-failure fallback.
+
